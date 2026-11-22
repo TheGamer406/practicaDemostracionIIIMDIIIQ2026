@@ -1,0 +1,17 @@
+services:
+  web:
+    build: ./web
+    container_name: discreta-web
+    restart: unless-stopped
+    expose:
+      - "4321"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: discreta-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web

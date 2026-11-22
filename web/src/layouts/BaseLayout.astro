@@ -1,0 +1,132 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Matemática Discreta FUN-03</title>
+    <style is:global>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b1021;
+        --panel: #141b34;
+        --fg: #e7ebff;
+        --muted: #9aa4c7;
+        --accent: #6ea8fe;
+        --ok: #4ade80;
+        --bad: #f87171;
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.6;
+      }
+      header.site {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #262e4f;
+        position: sticky;
+        top: 0;
+        background: var(--bg);
+        z-index: 10;
+        flex-wrap: wrap;
+      }
+      header.site a {
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      header.site a.active, header.site a:hover { color: var(--accent); }
+      main {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 5rem;
+      }
+      h1, h2, h3 { line-height: 1.25; }
+      .panel {
+        background: var(--panel);
+        border: 1px solid #262e4f;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin: 1.5rem 0;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent);
+        background: rgba(110, 168, 254, 0.12);
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        margin-bottom: 0.75rem;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        background: var(--accent);
+        color: #06122c;
+        border: none;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+      button:hover { filter: brightness(1.08); }
+      input, textarea {
+        font: inherit;
+        background: #0c1430;
+        color: var(--fg);
+        border: 1px solid #2d3763;
+        border-radius: 8px;
+        padding: 0.5rem 0.7rem;
+        width: 100%;
+      }
+      label { display: block; font-size: 0.85rem; color: var(--muted); margin: 0.6rem 0 0.25rem; }
+      .result { white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; }
+      .ok { color: var(--ok); }
+      .bad { color: var(--bad); }
+      a.download {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        border: 1px solid var(--accent);
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+      }
+      a.download:hover { background: rgba(110,168,254,0.1); }
+      pre { border-radius: 10px !important; font-size: 0.85rem; }
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.85rem;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <strong>FUN-03 · Matemática Discreta</strong>
+      <a href="/">Inicio</a>
+      <a href="/calificaciones">1. Calificaciones</a>
+      <a href="/inventario">2. Inventario</a>
+      <a href="/duplicados">3. Duplicados</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>Prueba de Demostración III · Universidad CENFOTEC</footer>
+  </body>
+</html>

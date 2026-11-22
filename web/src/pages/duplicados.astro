@@ -1,0 +1,108 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import duplicatesSource from "../lib/duplicates.ts?raw";
+---
+<BaseLayout title="3. Secuencias numéricas">
+  <span class="badge">Problema 3</span>
+  <h1>Juego de secuencias numéricas (principio del palomar)</h1>
+  <p>
+    Dada una lista de números, se determina si existen valores repetidos. Si
+    los hay, se devuelve la lista de duplicados; si no, se reporta que todos
+    son únicos.
+  </p>
+
+  <section class="panel">
+    <span class="badge">Demostración</span>
+    <h2>Principio del palomar (Pigeonhole Principle)</h2>
+    <p>
+      Sea <code>L = (x₁, x₂, …, xₙ)</code> la lista de entrada y sea
+      <code>V = {"{v : v aparece en L}"}</code> el conjunto (sin repetición)
+      de valores distintos que contiene. El principio del palomar establece:
+    </p>
+    <p>
+      <strong>Si <code>n</code> objetos (los elementos de <code>L</code>, los
+      "palomas") se distribuyen en <code>k</code> casillas (los valores
+      distintos de <code>V</code>, los "nidos") y <code>n &gt; k</code>,
+      entonces al menos una casilla contiene más de un objeto.</strong>
+    </p>
+    <p>
+      Formalmente: sea <code>f : {"{1,…,n}"} → V</code> la función que asigna
+      a cada posición de la lista su valor, <code>f(i) = xᵢ</code>. Si
+      <code>n = |L| &gt; |V| = k</code>, entonces <code>f</code> no puede ser
+      inyectiva (una función entre un conjunto finito más grande y uno más
+      pequeño nunca es inyectiva, por el teorema del palomar). Al no ser
+      inyectiva, existen índices <code>i ≠ j</code> con
+      <code>f(i) = f(j) = v</code> para algún <code>v</code>, es decir, existe
+      al menos un valor duplicado. Esto demuestra que:
+    </p>
+    <p><code>n &gt; |V|  ⟺  existe al menos un duplicado en L</code></p>
+    <p>
+      La implicación recíproca (si no hay duplicados entonces
+      <code>n = |V|</code>) es la contrapositiva del mismo argumento: si
+      <code>f</code> es inyectiva, cada palomar tiene a lo sumo un elemento,
+      por lo que <code>n ≤ |V|</code>; y como siempre <code>|V| ≤ n</code>
+      (todo valor distinto proviene de al menos una posición), se concluye
+      <code>n = |V|</code>.
+    </p>
+    <h3>Algoritmo (detección por conjunto auxiliar, O(n))</h3>
+    <ol>
+      <li>Mantener un conjunto <code>seen</code> (los "nidos" ya ocupados) y un conjunto <code>duplicates</code>.</li>
+      <li>Para cada <code>xᵢ</code>: si <code>xᵢ ∈ seen</code>, entonces ya había una "paloma" en ese nido ⇒ agregar <code>xᵢ</code> a <code>duplicates</code>. En cualquier caso, agregar <code>xᵢ</code> a <code>seen</code>.</li>
+      <li>Al terminar, si <code>duplicates = ∅</code> entonces, por la contrapositiva demostrada arriba, todos los elementos son únicos (<code>f</code> es inyectiva). Si no, se devuelve la lista de valores duplicados.</li>
+    </ol>
+    <p>
+      Esta estrategia evita la comparación por pares <code>O(n²)</code>
+      (fuerza bruta) y resuelve el problema en tiempo lineal usando una
+      tabla hash como estructura del conjunto <code>seen</code>.
+    </p>
+  </section>
+
+  <CodeBlock
+    code={duplicatesSource}
+    lang="ts"
+    downloadHref="/download/cli.mjs"
+    downloadName="demostracion3.mjs"
+  />
+
+  <section class="panel">
+    <span class="badge">Demo en vivo</span>
+    <h2>Pruébalo</h2>
+    <label for="dup-input">Lista de números (separados por coma)</label>
+    <input id="dup-input" value="3,7,3,9,1,7,12" />
+    <div style="margin-top:0.75rem;">
+      <button id="dup-run">Analizar</button>
+    </div>
+    <p id="dup-result" class="result"></p>
+  </section>
+
+  <script>
+    import { findDuplicates } from "../lib/duplicates";
+
+    const input = document.getElementById("dup-input") as HTMLInputElement;
+    const button = document.getElementById("dup-run") as HTMLButtonElement;
+    const result = document.getElementById("dup-result") as HTMLParagraphElement;
+
+    function run() {
+      const numbers = input.value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map(Number);
+
+      const outcome = findDuplicates(numbers);
+      if (outcome.hasDuplicates) {
+        result.className = "result bad";
+        result.textContent = `Duplicados: [${outcome.duplicates.join(", ")}]\nn = ${numbers.length}, |V| = ${
+          new Set(numbers).size
+        } ⇒ n > |V|, confirma el palomar.`;
+      } else {
+        result.className = "result ok";
+        result.textContent = `${outcome.message}\nn = ${numbers.length} = |V|, función inyectiva.`;
+      }
+    }
+
+    button.addEventListener("click", run);
+    run();
+  </script>
+</BaseLayout>

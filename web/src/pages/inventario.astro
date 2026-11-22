@@ -1,0 +1,142 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import inventorySource from "../lib/inventory.ts?raw";
+---
+<BaseLayout title="2. Análisis de inventario">
+  <span class="badge">Problema 2</span>
+  <h1>Análisis de productos en inventario</h1>
+  <p>
+    Dado un inventario (producto → cantidad disponible) y una lista de
+    demandas (producto, cantidad solicitada), se determina para cada
+    producto demandado si el stock alcanza, y se cuenta cuántos productos
+    quedan cortos.
+  </p>
+
+  <section class="panel">
+    <span class="badge">Demostración</span>
+    <h2>Modelo de teoría de conjuntos</h2>
+    <p>
+      Sea <code>S : P → ℕ</code> la función de stock, donde <code>P</code> es
+      el conjunto de productos registrados en inventario (su dominio), y sea
+      <code>D ⊆ P' × ℕ</code> la relación de demanda, con <code>P'</code> el
+      conjunto de productos demandados (no necesariamente <code>P' ⊆ P</code>,
+      un producto puede demandarse sin existir en inventario).
+    </p>
+    <p>
+      Para cada par <code>(p, q) ∈ D</code> se define el predicado de
+      suficiencia:
+    </p>
+    <p>
+      <code>Suf(p, q) ≡ S(p) ≥ q</code>, extendiendo <code>S(p) = 0</code>
+      cuando <code>p ∉ P</code> (producto sin registro ⇒ stock nulo por
+      convención).
+    </p>
+    <p>
+      Esto define una partición de <code>D</code> en dos subconjuntos
+      disjuntos:
+    </p>
+    <p>
+      <code>D₊ = {"{ (p,q) ∈ D : Suf(p,q) }"}</code> (demanda satisfecha) y
+      <code>D₋ = {"{ (p,q) ∈ D : ¬Suf(p,q) }"}</code> (demanda insuficiente),
+      con <code>D = D₊ ∪ D₋</code> y <code>D₊ ∩ D₋ = ∅</code> por ser
+      <code>Suf</code> un predicado (verdadero o falso, nunca ambos — ley del
+      tercero excluido aplicada a la comparación de orden en ℕ).
+    </p>
+    <p>
+      El valor que se reporta, <strong>cantidad de productos con
+      faltante</strong>, es exactamente <code>|D₋|</code>. La corrección del
+      algoritmo se demuestra por inducción sobre el tamaño de la lista de
+      demanda:
+    </p>
+    <ul>
+      <li>
+        <strong>Caso base</strong> (<code>|D| = 0</code>): no hay demandas,
+        <code>D₋ = ∅</code>, el contador inicia en 0. Se cumple
+        trivialmente.
+      </li>
+      <li>
+        <strong>Paso inductivo</strong>: supóngase que tras procesar las
+        primeras <code>k</code> demandas el contador vale exactamente
+        <code>|D₋ ∩ {"{primeras k}"}|</code> (hipótesis de inducción). Al
+        procesar la demanda <code>k+1 = (p, q)</code>, se evalúa
+        <code>Suf(p, q)</code>: si es falsa, el contador se incrementa en 1,
+        preservando la igualdad para <code>k+1</code>; si es verdadera, el
+        contador no cambia y la igualdad también se preserva, pues
+        <code>(p,q) ∉ D₋</code>. En ambos casos la invariante se mantiene.
+      </li>
+      <li>
+        Por el <strong>principio de inducción matemática</strong>, al
+        procesar las <code>n = |D|</code> demandas el contador final es
+        <code>|D₋|</code>, que es el resultado buscado.
+      </li>
+    </ul>
+    <h3>Algoritmo</h3>
+    <ol>
+      <li>Para cada <code>(p, q)</code> en la lista de demanda, obtener <code>S(p)</code> (0 si no existe).</li>
+      <li>Marcar suficiente si <code>S(p) ≥ q</code>.</li>
+      <li>Acumular el conteo de insuficientes — complejidad <code>O(n)</code> con búsqueda <code>O(1)</code> por tabla hash.</li>
+    </ol>
+  </section>
+
+  <CodeBlock
+    code={inventorySource}
+    lang="ts"
+    downloadHref="/download/cli.mjs"
+    downloadName="demostracion3.mjs"
+  />
+
+  <section class="panel">
+    <span class="badge">Demo en vivo</span>
+    <h2>Pruébalo</h2>
+    <label for="stock-input">Inventario (producto:cantidad, separados por coma)</label>
+    <input id="stock-input" value="manzanas:10, peras:5, uvas:20" />
+    <label for="demand-input">Demanda (producto:cantidad, separados por coma)</label>
+    <input id="demand-input" value="manzanas:12, peras:3, uvas:20, kiwis:4" />
+    <div style="margin-top:0.75rem;">
+      <button id="inventory-run">Analizar</button>
+    </div>
+    <p id="inventory-result" class="result"></p>
+  </section>
+
+  <script>
+    import { analyzeInventory, type DemandItem } from "../lib/inventory";
+
+    const stockInput = document.getElementById("stock-input") as HTMLInputElement;
+    const demandInput = document.getElementById("demand-input") as HTMLInputElement;
+    const button = document.getElementById("inventory-run") as HTMLButtonElement;
+    const result = document.getElementById("inventory-result") as HTMLParagraphElement;
+
+    function parsePairs(raw: string): Record<string, number> {
+      const out: Record<string, number> = {};
+      for (const chunk of raw.split(",")) {
+        const [k, v] = chunk.split(":").map((s) => s.trim());
+        if (!k) continue;
+        out[k] = Number(v);
+      }
+      return out;
+    }
+
+    function run() {
+      const stock = parsePairs(stockInput.value);
+      const demandMap = parsePairs(demandInput.value);
+      const demand: DemandItem[] = Object.entries(demandMap).map(([product, quantity]) => ({
+        product,
+        quantity,
+      }));
+
+      const { results, shortCount } = analyzeInventory(stock, demand);
+      const lines = results.map(
+        (r) =>
+          `${r.product}: demanda=${r.demanded} disponible=${r.available} -> ${
+            r.sufficient ? "OK" : "INSUFICIENTE"
+          }`
+      );
+      result.className = shortCount > 0 ? "result bad" : "result ok";
+      result.textContent = lines.join("\n") + `\n\nProductos con faltante: ${shortCount}`;
+    }
+
+    button.addEventListener("click", run);
+    run();
+  </script>
+</BaseLayout>

@@ -1,0 +1,47 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const problems = [
+  {
+    href: "/calificaciones",
+    title: "1. Clasificación de estudiantes por calificaciones",
+    desc: "Función de clasificación por intervalos disjuntos y exhaustivos (A–F).",
+  },
+  {
+    href: "/inventario",
+    title: "2. Análisis de productos en inventario",
+    desc: "Relación demanda–stock, predicado de suficiencia y demostración por inducción.",
+  },
+  {
+    href: "/duplicados",
+    title: "3. Juego de secuencias numéricas",
+    desc: "Detección de duplicados vía el principio del palomar.",
+  },
+];
+---
+<BaseLayout title="Inicio">
+  <span class="badge">Prueba de Demostración III</span>
+  <h1>Matemática Discreta — FUN-03</h1>
+  <p>
+    Este sitio contiene, para cada uno de los tres problemas de la consigna,
+    la demostración matemática formal, el código fuente (con descarga) y una
+    demo interactiva en vivo para que la profesora pueda ingresar sus propias
+    listas y verificar el funcionamiento en tiempo real.
+  </p>
+
+  {problems.map((p) => (
+    <a class="panel" href={p.href} style="display:block; text-decoration:none; color:inherit;">
+      <h2 style="margin:0 0 0.4rem;">{p.title}</h2>
+      <p style="margin:0; color:var(--muted);">{p.desc}</p>
+    </a>
+  ))}
+
+  <section class="panel">
+    <span class="badge">Código completo</span>
+    <p>
+      El script independiente con el menú de los 3 problemas está disponible
+      para descarga en cada página, o directamente aquí:
+      <a class="download" href="/download/cli.mjs" download="demostracion3.mjs">⬇ demostracion3.mjs</a>
+    </p>
+  </section>
+</BaseLayout>
