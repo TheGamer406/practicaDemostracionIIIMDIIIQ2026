@@ -6,9 +6,9 @@
     "node": ">=22.23.4"
   },
   "scripts": {
-    "sync:cli": "cp scripts/cli.mjs public/download/cli.mjs",
-    "predev": "npm run sync:cli",
-    "prebuild": "npm run sync:cli",
+    "sync:sources": "node scripts/sync-sources.mjs",
+    "predev": "npm run sync:sources",
+    "prebuild": "npm run sync:sources",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

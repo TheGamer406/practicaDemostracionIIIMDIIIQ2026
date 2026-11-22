@@ -1,0 +1,85 @@
+---
+import { highlightPython, parsePython } from "../lib/pysource";
+
+interface Props {
+  /** Fuente Python cruda (importada con `?raw`), con marcadores `#@nombre`. */
+  source: string;
+  /** Nombre del archivo mostrado en la cabecera del panel de código. */
+  fileName: string;
+  downloadHref: string;
+  downloadName: string;
+}
+
+const { source, fileName, downloadHref, downloadName } = Astro.props;
+const { code, markers } = parsePython(source);
+
+// Se arma el HTML del bloque de código como una sola cadena: dentro de <pre>
+// los saltos de línea del template de Astro se preservarían y romperían el
+// espaciado entre líneas.
+const codeHtml = highlightPython(code)
+  .map(
+    (line, index) =>
+      `<span class="code__line" data-line="${index + 1}">` +
+      `<span class="code__no">${index + 1}</span>` +
+      `<span class="code__text">${line}</span>` +
+      `</span>`
+  )
+  .join("");
+---
+
+<section class="trace" data-trace data-markers={JSON.stringify(markers)}>
+  <div class="trace__inputs">
+    <slot name="inputs" />
+  </div>
+
+  <div class="trace__controls">
+    <button class="btn btn--primary" data-act="play" data-playing="false">▶ Ejecutar</button>
+    <button class="btn" data-act="step">⏭ Paso</button>
+    <button class="btn btn--ghost" data-act="reset">↺ Reiniciar</button>
+
+    <div class="speeds" role="group" aria-label="Velocidad de ejecución">
+      <button class="speed" data-speed="slow" aria-pressed="false">Lento</button>
+      <button class="speed" data-speed="medium" aria-pressed="true">Medio</button>
+      <button class="speed" data-speed="fast" aria-pressed="false">Rápido</button>
+    </div>
+
+    <div class="trace__progress">
+      <input
+        class="scrub"
+        type="range"
+        min="0"
+        max="0"
+        value="0"
+        step="1"
+        data-scrub
+        aria-label="Avance de la ejecución"
+      />
+      <span class="progress__label" data-progress>paso 0 / 0</span>
+    </div>
+  </div>
+
+  <div class="trace__grid">
+    <div class="pane">
+      <header class="pane__head">
+        <span class="pane__title"><span class="dot dot--code"></span>{fileName}</span>
+        <a class="pane__link" href={downloadHref} download={downloadName}>⬇ {downloadName}</a>
+      </header>
+      <div class="code" data-code-scroll>
+        <pre><code set:html={codeHtml} /></pre>
+      </div>
+    </div>
+
+    <div class="pane">
+      <header class="pane__head">
+        <span class="pane__title"><span class="dot dot--state"></span>Cálculo en vivo</span>
+      </header>
+      <div class="state">
+        <p class="state__result" data-result></p>
+        <p class="state__note is-waiting" data-note>
+          Pulsá Ejecutar o Paso para ver el algoritmo recorrer la entrada.
+        </p>
+        <div class="vars" data-vars></div>
+      </div>
+    </div>
+  </div>
+</section>

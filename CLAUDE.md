@@ -9,26 +9,46 @@ the repo root (`docker-compose.yml`, `deploy.sh`, `.env.example`). See
 `README.md` for the full rationale of each piece (Astro, Docker multi-stage,
 Cloudflare Tunnel, git-pull deploy flow).
 
-- **Shared logic**: `web/src/lib/{grades,inventory,duplicates}.ts` — one file
-  per problem, pure TypeScript functions, no framework dependency. This is
-  the single source of truth for the algorithms.
+- **Python sources (the deliverable)**: `web/src/python/{calificaciones,
+  inventario,duplicados}.py` are the algorithms as shown on the site, and
+  `web/scripts/demostracion3.py` is the standalone CLI (menu + stdin prompts,
+  stdlib only) meant to be downloaded and run on its own. Python was chosen
+  because the professor reads Python.
+- **Line markers**: the per-problem `.py` files carry `#@name` comments at the
+  end of certain lines. `web/src/lib/pysource.ts` (`parsePython`) turns them
+  into a name → line-number map and strips them from the displayed code, so
+  the step-through highlight never hardcodes line numbers. If you add a trace
+  step, add the matching marker; if you remove a marker, remove the step.
+- **Trace engine**: `web/src/lib/{grades,inventory,duplicates}.ts` hold a
+  TypeScript mirror of each algorithm plus a `trace*()` function returning
+  `Frame[]` (see `web/src/lib/trace.ts`): each frame is one marker + a prose
+  note + the full state of the observed variables. The browser cannot run
+  Python, so this mirror is what drives the live animation — keep it in sync
+  with the `.py` files.
+- **Runner / UI**: `web/src/lib/runner.ts` wires a trace to the controls
+  (step, play at slow/medium/fast, scrub bar, reset) and renders the variable
+  panel. `web/src/components/LiveTrace.astro` is the side-by-side shell
+  (Python left, live state right).
+- **Styling**: one design system in `web/src/styles/global.css` — saturated
+  pastel tokens, light mode default, dark via `[data-theme="dark"]` on
+  `<html>` persisted to `localStorage`. Python syntax highlighting is
+  hand-rolled in `pysource.ts` so token colors come from the same variables.
 - **Pages**: `web/src/pages/{calificaciones,inventario,duplicados}.astro` —
-  each renders the formal math write-up, the problem's source file (via
-  `?raw` import), and a client-side `<script type="module">` that imports
-  the lib functions directly to run a live, interactive demo in the browser.
-- **Standalone CLI**: `web/scripts/cli.mjs` is an intentionally
-  self-contained duplicate of the three algorithms (menu + stdin prompts,
-  zero dependencies) — it is the literal "script" deliverable the rubric
-  asks for, meant to be downloaded and run on its own, so it does not import
-  from `src/lib`. It's synced into `web/public/download/cli.mjs` via
-  `npm run sync:cli` (runs automatically on `predev`/`prebuild`).
+  formal write-up, then `<LiveTrace>` with the page's inputs and a client
+  `<script>` that calls `createRunner`.
+  Note: Astro drops the whitespace when a markup line *starts* with an inline
+  tag (`<code>`, `<strong>`), so those lines need an explicit `{" "}` on the
+  previous line. Check rendered HTML after editing prose.
+- **Generated**: `web/public/download/*.py` is produced by
+  `npm run sync:sources` (runs on `predev`/`prebuild`) and is gitignored.
 - **Run locally**: `cd web && npm install && npm run dev`.
-- **Build**: `cd web && npm run build` (outputs a Node standalone server via
+- **Build**: `cd web && npm run build` (Node standalone server via
   `@astrojs/node`, entry at `dist/server/entry.mjs`).
 - **Docker**: `docker build -t discreta-web ./web`, or from the repo root
   `docker compose up -d --build` (brings up `web` + `cloudflared`).
-- No test suite exists; correctness was verified manually by running the
-  built site and the CLI end-to-end (see commit history / README).
+- No test suite exists; correctness was verified by running the built site
+  (step-through on all three pages, both themes, all speeds) and the CLI
+  end-to-end.
 
 Decision: the ZIP/document/video deliverable described in the PDF below is
 NOT being submitted separately — the web app itself is the full deliverable

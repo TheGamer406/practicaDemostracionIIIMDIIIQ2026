@@ -4,44 +4,82 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const problems = [
   {
     href: "/calificaciones",
-    title: "1. Clasificación de estudiantes por calificaciones",
-    desc: "Función de clasificación por intervalos disjuntos y exhaustivos (A–F).",
+    num: "Problema 01",
+    title: "Clasificación de estudiantes por calificaciones",
+    desc: "Función de clasificación por intervalos disjuntos y exhaustivos (A–F), con la invariante Σᵣ |Gᵣ| = |G| verificada en vivo.",
+    color: "var(--p1)",
   },
   {
     href: "/inventario",
-    title: "2. Análisis de productos en inventario",
-    desc: "Relación demanda–stock, predicado de suficiencia y demostración por inducción.",
+    num: "Problema 02",
+    title: "Análisis de productos en inventario",
+    desc: "Relación demanda–stock, predicado de suficiencia y demostración de corrección por inducción matemática.",
+    color: "var(--p2)",
   },
   {
     href: "/duplicados",
-    title: "3. Juego de secuencias numéricas",
-    desc: "Detección de duplicados vía el principio del palomar.",
+    num: "Problema 03",
+    title: "Juego de secuencias numéricas",
+    desc: "Detección de duplicados a partir del principio del palomar, con el conjunto de nidos ocupados visible paso a paso.",
+    color: "var(--p3)",
   },
 ];
 ---
 <BaseLayout title="Inicio">
-  <span class="badge">Prueba de Demostración III</span>
+  <span class="badge">Prueba de Demostración III · 2026</span>
   <h1>Matemática Discreta — FUN-03</h1>
-  <p>
-    Este sitio contiene, para cada uno de los tres problemas de la consigna,
-    la demostración matemática formal, el código fuente (con descarga) y una
-    demo interactiva en vivo para que la profesora pueda ingresar sus propias
-    listas y verificar el funcionamiento en tiempo real.
+  <p class="lede">
+    Para cada uno de los tres problemas de la consigna este sitio reúne la
+    demostración matemática formal, el código fuente en <strong>Python</strong>{" "}
+    (visible y descargable) y una ejecución interactiva paso a paso: el código a
+    la izquierda, el valor de cada variable a la derecha, avanzando línea por
+    línea a la velocidad que se elija.
   </p>
 
-  {problems.map((p) => (
-    <a class="panel" href={p.href} style="display:block; text-decoration:none; color:inherit;">
-      <h2 style="margin:0 0 0.4rem;">{p.title}</h2>
-      <p style="margin:0; color:var(--muted);">{p.desc}</p>
-    </a>
-  ))}
+  <div class="cards">
+    {problems.map((problem) => (
+      <a class="card reveal" href={problem.href} style={`--card-color: ${problem.color}`}>
+        <span class="card__num">{problem.num}</span>
+        <span class="card__title">{problem.title}</span>
+        <p class="card__desc">{problem.desc}</p>
+        <span class="card__more">Ver demostración y ejecución →</span>
+      </a>
+    ))}
+  </div>
 
   <section class="panel">
-    <span class="badge">Código completo</span>
+    <span class="badge badge--p4">Código completo</span>
+    <h2>Un solo script, los tres problemas</h2>
     <p>
-      El script independiente con el menú de los 3 problemas está disponible
-      para descarga en cada página, o directamente aquí:
-      <a class="download" href="/download/cli.mjs" download="demostracion3.mjs">⬇ demostracion3.mjs</a>
+      <code>demostracion3.py</code> es un script autocontenido, sin dependencias
+      externas, con un menú de consola para los tres problemas. Se ejecuta con:
     </p>
+    <span class="formula">python3 demostracion3.py</span>
+    <a class="download" href="/download/demostracion3.py" download="demostracion3.py">
+      ⬇ demostracion3.py
+    </a>
+  </section>
+
+  <section class="panel">
+    <span class="badge badge--ok">Cómo leer este sitio</span>
+    <h2>Qué hay en cada página</h2>
+    <ol>
+      <li>
+        <strong>Demostración.</strong> El modelo matemático del problema y el
+        método formal que justifica la solución (partición de un dominio,
+        inducción matemática o principio del palomar según el caso).
+      </li>
+      <li>
+        <strong>Ejecución en vivo.</strong> El código Python a la izquierda con la
+        línea activa resaltada, y a la derecha el estado de las variables en ese
+        instante: listas con cursor, conjuntos que crecen, contadores y tablas.
+        Se puede avanzar paso a paso, arrastrar la barra de avance o dejarlo
+        correr en modo lento, medio o rápido.
+      </li>
+      <li>
+        <strong>Descarga.</strong> El archivo del problema y el script completo,
+        listos para correr con Python 3.
+      </li>
+    </ol>
   </section>
 </BaseLayout>

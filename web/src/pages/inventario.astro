@@ -1,142 +1,164 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import CodeBlock from "../components/CodeBlock.astro";
-import inventorySource from "../lib/inventory.ts?raw";
+import LiveTrace from "../components/LiveTrace.astro";
+import inventorySource from "../python/inventario.py?raw";
 ---
 <BaseLayout title="2. Análisis de inventario">
-  <span class="badge">Problema 2</span>
+  <span class="badge badge--p2">Problema 2 · Inducción matemática</span>
   <h1>Análisis de productos en inventario</h1>
-  <p>
-    Dado un inventario (producto → cantidad disponible) y una lista de
-    demandas (producto, cantidad solicitada), se determina para cada
-    producto demandado si el stock alcanza, y se cuenta cuántos productos
-    quedan cortos.
+  <p class="lede">
+    Dado un inventario (producto → cantidad disponible) y una lista de demandas
+    (producto, cantidad solicitada), se determina para cada producto demandado
+    si el stock alcanza, y se cuenta cuántos productos quedan cortos.
   </p>
 
-  <section class="panel">
-    <span class="badge">Demostración</span>
+  <section class="panel panel--proof reveal">
+    <span class="badge badge--p2">Demostración</span>
     <h2>Modelo de teoría de conjuntos</h2>
     <p>
-      Sea <code>S : P → ℕ</code> la función de stock, donde <code>P</code> es
-      el conjunto de productos registrados en inventario (su dominio), y sea
+      Sea <code>S : P → ℕ</code> la función de stock, donde <code>P</code> es el
+      conjunto de productos registrados en inventario (su dominio), y sea{" "}
       <code>D ⊆ P' × ℕ</code> la relación de demanda, con <code>P'</code> el
-      conjunto de productos demandados (no necesariamente <code>P' ⊆ P</code>,
-      un producto puede demandarse sin existir en inventario).
+      conjunto de productos demandados (no necesariamente{" "}
+      <code>P' ⊆ P</code>: un producto puede demandarse sin existir en
+      inventario).
     </p>
+    <p>Para cada par <code>(p, q) ∈ D</code> se define el predicado de suficiencia:</p>
+    <span class="formula">Suf(p, q) ≡ S(p) ≥ q</span>
     <p>
-      Para cada par <code>(p, q) ∈ D</code> se define el predicado de
-      suficiencia:
+      extendiendo <code>S(p) = 0</code> cuando <code>p ∉ P</code> (producto sin
+      registro ⇒ stock nulo por convención). Esto define una partición de{" "}
+      <code>D</code> en dos subconjuntos disjuntos:
     </p>
+    <span class="formula">D₊ = {"{ (p,q) ∈ D : Suf(p,q) }"}     D₋ = {"{ (p,q) ∈ D : ¬Suf(p,q) }"}</span>
     <p>
-      <code>Suf(p, q) ≡ S(p) ≥ q</code>, extendiendo <code>S(p) = 0</code>
-      cuando <code>p ∉ P</code> (producto sin registro ⇒ stock nulo por
-      convención).
-    </p>
-    <p>
-      Esto define una partición de <code>D</code> en dos subconjuntos
-      disjuntos:
-    </p>
-    <p>
-      <code>D₊ = {"{ (p,q) ∈ D : Suf(p,q) }"}</code> (demanda satisfecha) y
-      <code>D₋ = {"{ (p,q) ∈ D : ¬Suf(p,q) }"}</code> (demanda insuficiente),
-      con <code>D = D₊ ∪ D₋</code> y <code>D₊ ∩ D₋ = ∅</code> por ser
+      con <code>D = D₊ ∪ D₋</code> y <code>D₊ ∩ D₋ = ∅</code> por ser{" "}
       <code>Suf</code> un predicado (verdadero o falso, nunca ambos — ley del
       tercero excluido aplicada a la comparación de orden en ℕ).
     </p>
     <p>
-      El valor que se reporta, <strong>cantidad de productos con
-      faltante</strong>, es exactamente <code>|D₋|</code>. La corrección del
-      algoritmo se demuestra por inducción sobre el tamaño de la lista de
-      demanda:
+      El valor que se reporta, <strong>cantidad de productos con faltante</strong>,
+      es exactamente <code>|D₋|</code>. La corrección del algoritmo se demuestra
+      por inducción sobre el tamaño de la lista de demanda:
     </p>
     <ul>
       <li>
-        <strong>Caso base</strong> (<code>|D| = 0</code>): no hay demandas,
-        <code>D₋ = ∅</code>, el contador inicia en 0. Se cumple
-        trivialmente.
+        <strong>Caso base</strong> (<code>|D| = 0</code>): no hay demandas,{" "}
+        <code>D₋ = ∅</code> y el contador inicia en 0. Se cumple trivialmente.
       </li>
       <li>
-        <strong>Paso inductivo</strong>: supóngase que tras procesar las
-        primeras <code>k</code> demandas el contador vale exactamente
+        <strong>Paso inductivo</strong>: supóngase que tras procesar las primeras{" "}
+        <code>k</code> demandas el contador vale exactamente{" "}
         <code>|D₋ ∩ {"{primeras k}"}|</code> (hipótesis de inducción). Al
-        procesar la demanda <code>k+1 = (p, q)</code>, se evalúa
+        procesar la demanda <code>k+1 = (p, q)</code> se evalúa{" "}
         <code>Suf(p, q)</code>: si es falsa, el contador se incrementa en 1,
         preservando la igualdad para <code>k+1</code>; si es verdadera, el
-        contador no cambia y la igualdad también se preserva, pues
+        contador no cambia y la igualdad también se preserva, pues{" "}
         <code>(p,q) ∉ D₋</code>. En ambos casos la invariante se mantiene.
       </li>
       <li>
-        Por el <strong>principio de inducción matemática</strong>, al
-        procesar las <code>n = |D|</code> demandas el contador final es
-        <code>|D₋|</code>, que es el resultado buscado.
+        Por el <strong>principio de inducción matemática</strong>, al procesar las{" "}
+        <code>n = |D|</code> demandas el contador final es <code>|D₋|</code>, que
+        es el resultado buscado.
       </li>
     </ul>
+    <p>
+      La ejecución paso a paso de abajo recorre precisamente este argumento: cada
+      iteración es el paso inductivo, y el panel derecho muestra cómo{" "}
+      <code>faltantes</code> conserva la invariante tras cada demanda.
+    </p>
+
     <h3>Algoritmo</h3>
     <ol>
-      <li>Para cada <code>(p, q)</code> en la lista de demanda, obtener <code>S(p)</code> (0 si no existe).</li>
+      <li>Para cada <code>(p, q)</code> de la lista de demanda, obtener <code>S(p)</code> (0 si no existe).</li>
       <li>Marcar suficiente si <code>S(p) ≥ q</code>.</li>
       <li>Acumular el conteo de insuficientes — complejidad <code>O(n)</code> con búsqueda <code>O(1)</code> por tabla hash.</li>
     </ol>
   </section>
 
-  <CodeBlock
-    code={inventorySource}
-    lang="ts"
-    downloadHref="/download/cli.mjs"
-    downloadName="demostracion3.mjs"
-  />
+  <section class="reveal">
+    <span class="badge badge--p3">Ejecución en vivo</span>
+    <h2>Código y cálculo, lado a lado</h2>
+    <p class="lede">
+      El inventario aparece como barras; la lista de demanda avanza con un
+      cursor. La tabla <code>resultados</code> se va llenando con la
+      clasificación en D₊ / D₋ de cada par.
+    </p>
 
-  <section class="panel">
-    <span class="badge">Demo en vivo</span>
-    <h2>Pruébalo</h2>
-    <label for="stock-input">Inventario (producto:cantidad, separados por coma)</label>
-    <input id="stock-input" value="manzanas:10, peras:5, uvas:20" />
-    <label for="demand-input">Demanda (producto:cantidad, separados por coma)</label>
-    <input id="demand-input" value="manzanas:12, peras:3, uvas:20, kiwis:4" />
-    <div style="margin-top:0.75rem;">
-      <button id="inventory-run">Analizar</button>
-    </div>
-    <p id="inventory-result" class="result"></p>
+    <LiveTrace
+      source={inventorySource}
+      fileName="inventario.py"
+      downloadHref="/download/inventario.py"
+      downloadName="inventario.py"
+    >
+      <Fragment slot="inputs">
+        <div class="field">
+          <label for="stock-input">Inventario (producto:cantidad, separados por coma)</label>
+          <input id="stock-input" type="text" value="manzanas:10, peras:5, uvas:20" />
+        </div>
+        <div class="field">
+          <label for="demand-input">Demanda (producto:cantidad, separados por coma)</label>
+          <input id="demand-input" type="text" value="manzanas:12, peras:3, uvas:20, kiwis:4" />
+        </div>
+      </Fragment>
+    </LiveTrace>
+  </section>
+
+  <section class="panel reveal">
+    <span class="badge badge--p4">Script completo</span>
+    <h2>Los tres problemas en un solo archivo</h2>
+    <p>
+      El script autocontenido con el menú de los tres problemas corre con{" "}
+      <code>python3 demostracion3.py</code> y no necesita dependencias.
+    </p>
+    <a class="download" href="/download/demostracion3.py" download="demostracion3.py">
+      ⬇ demostracion3.py
+    </a>
   </section>
 
   <script>
-    import { analyzeInventory, type DemandItem } from "../lib/inventory";
+    import { analyzeInventory, traceInventory, type DemandItem } from "../lib/inventory";
+    import { createRunner } from "../lib/runner";
 
-    const stockInput = document.getElementById("stock-input") as HTMLInputElement;
-    const demandInput = document.getElementById("demand-input") as HTMLInputElement;
-    const button = document.getElementById("inventory-run") as HTMLButtonElement;
-    const result = document.getElementById("inventory-result") as HTMLParagraphElement;
+    const root = document.querySelector<HTMLElement>("[data-trace]")!;
+    const markers = JSON.parse(root.dataset.markers!) as Record<string, number>;
+    const stockInput = document.querySelector<HTMLInputElement>("#stock-input")!;
+    const demandInput = document.querySelector<HTMLInputElement>("#demand-input")!;
 
-    function parsePairs(raw: string): Record<string, number> {
-      const out: Record<string, number> = {};
+    function parsePairs(raw: string, label: string): Array<[string, number]> {
+      const pairs: Array<[string, number]> = [];
       for (const chunk of raw.split(",")) {
-        const [k, v] = chunk.split(":").map((s) => s.trim());
-        if (!k) continue;
-        out[k] = Number(v);
+        if (!chunk.trim()) continue;
+        if (!chunk.includes(":")) {
+          throw new Error(`En ${label}, "${chunk.trim()}" no tiene el formato producto:cantidad.`);
+        }
+        const [name, value] = chunk.split(":");
+        const quantity = Number(value.trim());
+        if (!name.trim() || Number.isNaN(quantity)) {
+          throw new Error(`En ${label}, "${chunk.trim()}" no tiene el formato producto:cantidad.`);
+        }
+        pairs.push([name.trim(), quantity]);
       }
-      return out;
+      return pairs;
     }
 
-    function run() {
-      const stock = parsePairs(stockInput.value);
-      const demandMap = parsePairs(demandInput.value);
-      const demand: DemandItem[] = Object.entries(demandMap).map(([product, quantity]) => ({
-        product,
-        quantity,
-      }));
-
-      const { results, shortCount } = analyzeInventory(stock, demand);
-      const lines = results.map(
-        (r) =>
-          `${r.product}: demanda=${r.demanded} disponible=${r.available} -> ${
-            r.sufficient ? "OK" : "INSUFICIENTE"
-          }`
+    const runner = createRunner(root, markers, () => {
+      const stock = Object.fromEntries(parsePairs(stockInput.value, "el inventario"));
+      const demand: DemandItem[] = parsePairs(demandInput.value, "la demanda").map(
+        ([product, quantity]) => ({ product, quantity })
       );
-      result.className = shortCount > 0 ? "result bad" : "result ok";
-      result.textContent = lines.join("\n") + `\n\nProductos con faltante: ${shortCount}`;
-    }
+      if (!demand.length) {
+        throw new Error("Ingresá al menos una demanda.");
+      }
+      const { shortCount } = analyzeInventory(stock, demand);
+      return {
+        frames: traceInventory(stock, demand),
+        summary: `Productos con faltante |D₋| = ${shortCount} de ${demand.length} demandas`,
+        tone: shortCount > 0 ? ("bad" as const) : ("ok" as const),
+      };
+    });
 
-    button.addEventListener("click", run);
-    run();
+    stockInput.addEventListener("input", () => runner.refresh());
+    demandInput.addEventListener("input", () => runner.refresh());
   </script>
 </BaseLayout>
