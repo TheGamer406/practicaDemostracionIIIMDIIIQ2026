@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# copias generadas por scripts/sync-sources.mjs
+public/download/

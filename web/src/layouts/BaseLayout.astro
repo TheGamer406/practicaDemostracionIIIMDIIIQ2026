@@ -1,132 +1,85 @@
 ---
+import "../styles/global.css";
+
 interface Props {
   title: string;
+  description?: string;
 }
-const { title } = Astro.props;
+
+const { title, description = "Prueba de Demostración III — Matemática Discreta (FUN-03), Universidad CENFOTEC." } =
+  Astro.props;
+
+const links = [
+  { href: "/", label: "Inicio" },
+  { href: "/calificaciones", label: "1 · Calificaciones" },
+  { href: "/inventario", label: "2 · Inventario" },
+  { href: "/duplicados", label: "3 · Duplicados" },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} · Matemática Discreta FUN-03</title>
-    <style is:global>
-      :root {
-        color-scheme: light dark;
-        --bg: #0b1021;
-        --panel: #141b34;
-        --fg: #e7ebff;
-        --muted: #9aa4c7;
-        --accent: #6ea8fe;
-        --ok: #4ade80;
-        --bad: #f87171;
-        font-family: "Inter", system-ui, sans-serif;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--fg);
-        line-height: 1.6;
-      }
-      header.site {
-        display: flex;
-        gap: 1.5rem;
-        align-items: center;
-        padding: 1rem 2rem;
-        border-bottom: 1px solid #262e4f;
-        position: sticky;
-        top: 0;
-        background: var(--bg);
-        z-index: 10;
-        flex-wrap: wrap;
-      }
-      header.site a {
-        color: var(--muted);
-        text-decoration: none;
-        font-weight: 600;
-      }
-      header.site a.active, header.site a:hover { color: var(--accent); }
-      main {
-        max-width: 880px;
-        margin: 0 auto;
-        padding: 2rem 1.5rem 5rem;
-      }
-      h1, h2, h3 { line-height: 1.25; }
-      .panel {
-        background: var(--panel);
-        border: 1px solid #262e4f;
-        border-radius: 12px;
-        padding: 1.25rem 1.5rem;
-        margin: 1.5rem 0;
-      }
-      .badge {
-        display: inline-block;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--accent);
-        background: rgba(110, 168, 254, 0.12);
-        padding: 0.2rem 0.6rem;
-        border-radius: 999px;
-        margin-bottom: 0.75rem;
-      }
-      button {
-        font: inherit;
-        cursor: pointer;
-        background: var(--accent);
-        color: #06122c;
-        border: none;
-        padding: 0.55rem 1rem;
-        border-radius: 8px;
-        font-weight: 600;
-      }
-      button:hover { filter: brightness(1.08); }
-      input, textarea {
-        font: inherit;
-        background: #0c1430;
-        color: var(--fg);
-        border: 1px solid #2d3763;
-        border-radius: 8px;
-        padding: 0.5rem 0.7rem;
-        width: 100%;
-      }
-      label { display: block; font-size: 0.85rem; color: var(--muted); margin: 0.6rem 0 0.25rem; }
-      .result { white-space: pre-wrap; font-family: "JetBrains Mono", monospace; font-size: 0.9rem; }
-      .ok { color: var(--ok); }
-      .bad { color: var(--bad); }
-      a.download {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--accent);
-        text-decoration: none;
-        font-weight: 600;
-        border: 1px solid var(--accent);
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-      }
-      a.download:hover { background: rgba(110,168,254,0.1); }
-      pre { border-radius: 10px !important; font-size: 0.85rem; }
-      footer {
-        text-align: center;
-        color: var(--muted);
-        font-size: 0.85rem;
-        padding: 2rem;
-      }
-    </style>
+    <script is:inline>
+      // Se aplica el tema antes del primer pintado para evitar el parpadeo.
+      // El modo claro es el predeterminado; el oscuro solo si se eligió.
+      try {
+        if (localStorage.getItem("tema") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        }
+      } catch (_) {}
+    </script>
   </head>
   <body>
-    <header class="site">
-      <strong>FUN-03 · Matemática Discreta</strong>
-      <a href="/">Inicio</a>
-      <a href="/calificaciones">1. Calificaciones</a>
-      <a href="/inventario">2. Inventario</a>
-      <a href="/duplicados">3. Duplicados</a>
+    <header class="site-head">
+      <a class="brand" href="/">
+        <span class="brand__mark">∀</span>
+        FUN-03 · Matemática Discreta
+      </a>
+      <nav class="nav">
+        {links.map((link) => (
+          <a href={link.href} aria-current={path === link.href ? "page" : undefined}>
+            {link.label}
+          </a>
+        ))}
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Cambiar entre modo claro y oscuro">
+        <svg class="icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+        <svg class="icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+      </button>
     </header>
+
     <main>
       <slot />
     </main>
-    <footer>Prueba de Demostración III · Universidad CENFOTEC</footer>
+
+    <footer class="site-foot">
+      Prueba de Demostración III · Universidad CENFOTEC · Los tres algoritmos están
+      escritos en Python y se ejecutan paso a paso en esta página.
+    </footer>
+
+    <script is:inline>
+      document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
+        const root = document.documentElement;
+        const next = root.dataset.theme === "dark" ? "light" : "dark";
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem("tema", next);
+        } catch (_) {}
+      });
+    </script>
   </body>
 </html>

@@ -1,118 +1,144 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import CodeBlock from "../components/CodeBlock.astro";
-import gradesSource from "../lib/grades.ts?raw";
+import LiveTrace from "../components/LiveTrace.astro";
+import gradesSource from "../python/calificaciones.py?raw";
 ---
 <BaseLayout title="1. Clasificación de estudiantes">
-  <span class="badge">Problema 1</span>
+  <span class="badge">Problema 1 · Partición del dominio</span>
   <h1>Clasificación de estudiantes por calificaciones</h1>
-  <p>
+  <p class="lede">
     Un profesor necesita contar cuántos estudiantes caen en cada rango de
-    nota: <strong>A</strong> (90–100), <strong>B</strong> (80–89),
-    <strong>C</strong> (70–79), <strong>D</strong> (60–69) y
+    nota: <strong>A</strong> (90–100), <strong>B</strong> (80–89),{" "}
+    <strong>C</strong> (70–79), <strong>D</strong> (60–69) y{" "}
     <strong>F</strong> (0–59).
   </p>
 
-  <section class="panel">
-    <span class="badge">Demostración</span>
+  <section class="panel panel--proof reveal">
+    <span class="badge badge--p2">Demostración</span>
     <h2>Modelo matemático</h2>
     <p>
       Sea <code>G = {"{g₁, g₂, …, gₙ}"}</code> el conjunto (con repetición, es
-      decir una <em>lista</em>) de calificaciones recibidas, y sea
+      decir una <em>lista</em>) de calificaciones recibidas, y sea{" "}
       <code>R = {"{A, B, C, D, F}"}</code> el conjunto de rangos. Definimos la
       función de clasificación:
     </p>
-    <p><code>f : [0,100] → R</code></p>
+    <span class="formula">f : [0,100] → R</span>
     <p>
-      como una función <strong>total</strong> definida por partición del
-      dominio en cinco intervalos disjuntos y exhaustivos:
+      como una función <strong>total</strong> definida por partición del dominio
+      en cinco intervalos disjuntos y exhaustivos:
     </p>
+    <span class="formula">[0,100] = [0,59] ∪ [60,69] ∪ [70,79] ∪ [80,89] ∪ [90,100]</span>
     <p>
-      <code>[0,100] = [0,59] ∪ [60,69] ∪ [70,79] ∪ [80,89] ∪ [90,100]</code>
-    </p>
-    <p>
-      Como los cinco intervalos son disjuntos dos a dos y su unión cubre todo
-      el dominio válido de una calificación, <code>f</code> está bien
-      definida para cualquier <code>g ∈ [0,100]</code> (existencia y unicidad
-      de la imagen). Esto se demuestra por casos exhaustivos sobre el valor
-      de <code>g</code>: exactamente una de las cinco condiciones se cumple
-      para cualquier real en <code>[0,100]</code>, por tricotomía del orden
-      en los reales aplicada sucesivamente a cada frontera (59/60, 69/70,
-      79/80, 89/90).
+      Como los cinco intervalos son disjuntos dos a dos y su unión cubre todo el
+      dominio válido de una calificación, <code>f</code> está bien definida para
+      cualquier <code>g ∈ [0,100]</code> (existencia y unicidad de la imagen).
+      Esto se demuestra por casos exhaustivos sobre el valor de <code>g</code>:
+      exactamente una de las cinco condiciones se cumple para cualquier real en{" "}
+      <code>[0,100]</code>, por tricotomía del orden en los reales aplicada
+      sucesivamente a cada frontera (59/60, 69/70, 79/80, 89/90).
     </p>
     <p>
       El conteo por rango se modela como una <strong>partición inducida</strong>:
-      para cada <code>r ∈ R</code>, el subconjunto
-      <code>Gᵣ = {"{ g ∈ G : f(g) = r }"}</code> agrupa a los estudiantes de
-      ese rango, y como <code>f</code> es función (una sola imagen por
-      elemento), los conjuntos <code>Gᵣ</code> son disjuntos entre sí y
-      <code>G = ⋃ᵣ Gᵣ</code>. El resultado que se devuelve es el mapa
+      para cada <code>r ∈ R</code>, el subconjunto{" "}
+      <code>Gᵣ = {"{ g ∈ G : f(g) = r }"}</code> agrupa a los estudiantes de ese
+      rango, y como <code>f</code> es función (una sola imagen por elemento), los
+      conjuntos <code>Gᵣ</code> son disjuntos entre sí y{" "}
+      <code>G = ⋃ᵣ Gᵣ</code>. El resultado que se devuelve es el mapa{" "}
       <code>r ↦ |Gᵣ|</code>, y por construcción se cumple la invariante de
       conservación de cardinalidad:
     </p>
-    <p><code>Σᵣ |Gᵣ| = |G|</code></p>
+    <span class="formula">Σᵣ |Gᵣ| = |G|</span>
     <p>
       Esta igualdad (consecuencia directa de que la partición es disjunta y
       exhaustiva) es la verificación formal de que el algoritmo no pierde ni
-      duplica estudiantes al clasificar: la suma de los conteos del
-      diccionario resultado siempre debe coincidir con la longitud de la
-      lista de entrada.
+      duplica estudiantes al clasificar: la suma de los conteos del diccionario
+      resultado siempre debe coincidir con la longitud de la lista de entrada.
+      En la ejecución de abajo se muestra en vivo como <code>Σ conteo</code>.
     </p>
+
     <h3>Algoritmo (clasificación lineal)</h3>
     <ol>
-      <li>Inicializar un acumulador <code>counts[r] = 0</code> para cada <code>r ∈ R</code>.</li>
-      <li>Para cada calificación <code>g</code> en la lista de entrada, calcular <code>r = f(g)</code> evaluando los cinco intervalos.</li>
-      <li>Incrementar <code>counts[r]</code> en 1.</li>
-      <li>Devolver <code>counts</code> al terminar de recorrer la lista — complejidad <code>O(n)</code>.</li>
+      <li>Inicializar un acumulador <code>conteo[r] = 0</code> para cada <code>r ∈ R</code>.</li>
+      <li>Para cada calificación <code>g</code> de la lista, calcular <code>r = f(g)</code> evaluando los cinco intervalos.</li>
+      <li>Incrementar <code>conteo[r]</code> en 1.</li>
+      <li>Devolver <code>conteo</code> al terminar el recorrido — complejidad <code>O(n)</code>.</li>
     </ol>
   </section>
 
-  <CodeBlock
-    code={gradesSource}
-    lang="ts"
-    downloadHref="/download/cli.mjs"
-    downloadName="demostracion3.mjs"
-  />
+  <section class="reveal">
+    <span class="badge badge--p3">Ejecución en vivo</span>
+    <h2>Código y cálculo, lado a lado</h2>
+    <p class="lede">
+      A la izquierda, el código Python con la línea que se está ejecutando
+      resaltada. A la derecha, el valor de cada variable en ese instante.
+      Avanzá con <strong>Paso</strong> o dejá correr la ejecución a la velocidad
+      que prefieras.
+    </p>
 
-  <section class="panel">
-    <span class="badge">Demo en vivo</span>
-    <h2>Pruébalo</h2>
-    <label for="grades-input">Lista de calificaciones (separadas por coma)</label>
-    <input id="grades-input" value="95,82,60,45,100,59,100" />
-    <div style="margin-top:0.75rem;">
-      <button id="grades-run">Clasificar</button>
-    </div>
-    <p id="grades-result" class="result"></p>
+    <LiveTrace
+      source={gradesSource}
+      fileName="calificaciones.py"
+      downloadHref="/download/calificaciones.py"
+      downloadName="calificaciones.py"
+    >
+      <div slot="inputs" class="field">
+        <label for="grades-input">Lista de calificaciones (separadas por coma)</label>
+        <input id="grades-input" type="text" value="95, 82, 60, 45, 100, 59, 100" />
+      </div>
+    </LiveTrace>
+  </section>
+
+  <section class="panel reveal">
+    <span class="badge badge--p4">Script completo</span>
+    <h2>Los tres problemas en un solo archivo</h2>
+    <p>
+      El script autocontenido con el menú de los tres problemas corre con{" "}
+      <code>python3 demostracion3.py</code> y no necesita dependencias.
+    </p>
+    <a class="download" href="/download/demostracion3.py" download="demostracion3.py">
+      ⬇ demostracion3.py
+    </a>
   </section>
 
   <script>
-    import { classifyGrades } from "../lib/grades";
+    import { classifyGrades, traceGrades } from "../lib/grades";
+    import { createRunner } from "../lib/runner";
 
-    const input = document.getElementById("grades-input") as HTMLInputElement;
-    const button = document.getElementById("grades-run") as HTMLButtonElement;
-    const result = document.getElementById("grades-result") as HTMLParagraphElement;
+    const root = document.querySelector<HTMLElement>("[data-trace]")!;
+    const markers = JSON.parse(root.dataset.markers!) as Record<string, number>;
+    const input = document.querySelector<HTMLInputElement>("#grades-input")!;
 
-    function run() {
-      const grades = input.value
+    function parseGrades(): number[] {
+      return input.value
         .split(",")
-        .map((s) => s.trim())
+        .map((part) => part.trim())
         .filter(Boolean)
-        .map(Number);
-
-      try {
-        const counts = classifyGrades(grades);
-        const total = Object.values(counts).reduce((a, b) => a + b, 0);
-        result.className = "result ok";
-        result.textContent =
-          JSON.stringify(counts, null, 2) +
-          `\n\nΣ counts = ${total}  (debe igualar n = ${grades.length})`;
-      } catch (err) {
-        result.className = "result bad";
-        result.textContent = String((err as Error).message);
-      }
+        .map((part) => {
+          const value = Number(part);
+          if (Number.isNaN(value)) {
+            throw new Error(`"${part}" no es un número válido.`);
+          }
+          return value;
+        });
     }
 
-    button.addEventListener("click", run);
-    run();
+    const runner = createRunner(root, markers, () => {
+      const grades = parseGrades();
+      if (!grades.length) {
+        throw new Error("Ingresá al menos una calificación.");
+      }
+      const counts = classifyGrades(grades);
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      const detail = Object.entries(counts)
+        .map(([range, count]) => `${range}=${count}`)
+        .join("  ");
+      return {
+        frames: traceGrades(grades),
+        summary: `${detail}   ·   Σ conteo = ${total} = n`,
+        tone: total === grades.length ? ("ok" as const) : ("bad" as const),
+      };
+    });
+
+    input.addEventListener("input", () => runner.refresh());
   </script>
 </BaseLayout>
