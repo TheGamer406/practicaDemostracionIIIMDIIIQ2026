@@ -99,10 +99,8 @@ npm run dev        # http://localhost:4321
 
 ## Relación con el entregable académico
 
-La rúbrica (ver `Prueba de demostración 3.pdf`) exige subir a Moodle un
-ZIP/RAR con el código, un documento con el paso a paso de la demostración
-matemática, y un video. **Este sitio no reemplaza esa entrega**, es una capa
-adicional para presentación/demo en vivo: el código fuente real para el ZIP
-es `web/src/lib/*.ts` + `web/scripts/cli.mjs` (descargable también desde el
-propio sitio), y el documento escrito puede derivarse directamente de las
-secciones "Demostración" de cada página (export a PDF/Docx).
+La consigna original (`Prueba de demostración 3.pdf`) pedía subir a Moodle un
+ZIP/RAR con código + documento + video. Se decidió no hacer esa entrega por
+separado: el sitio web **es** el entregable completo — código visible y
+descargable, demostración matemática escrita en cada página, y demo en vivo
+en lugar de un video grabado.

@@ -30,9 +30,10 @@ Cloudflare Tunnel, git-pull deploy flow).
 - No test suite exists; correctness was verified manually by running the
   built site and the CLI end-to-end (see commit history / README).
 
-This web app is a presentation/demo layer, not a replacement for the
-academic deliverable below — the ZIP still needs the source code, written
-document, and video per the assignment's own format.
+Decision: the ZIP/document/video deliverable described in the PDF below is
+NOT being submitted separately — the web app itself is the full deliverable
+(code viewable + downloadable, math write-up per page, live demo instead of
+a recorded video).
 
 ## Assignment context
 
